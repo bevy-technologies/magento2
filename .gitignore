@@ -5,6 +5,8 @@
 /.settings
 /.vscode
 atlassian*
+/log
+/mysql
 /nbproject
 /robots.txt
 /pub/robots.txt
