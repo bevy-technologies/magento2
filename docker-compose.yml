@@ -1,0 +1,60 @@
+version: '1'
+
+services:
+  frontend:
+    build: .
+    image: sensson/magento2
+    restart: always
+    depends_on:
+      - mysql
+      - search
+    links:
+      - mysql
+      - search
+    ports:
+      - "8080:80"
+    volumes:
+      - ./app/code:/var/www/html
+    environment:
+      - RUNTYPE=development
+      - MYSQL_HOSTNAME=mysql
+      - MYSQL_USERNAME=root
+      - MYSQL_PASSWORD=
+      - MYSQL_DATABASE=magento
+      - CRYPTO_KEY=1ccc240d-76e9-481c-bb6d-962533f3994f
+      - URI=http://localhost:8080
+      - BACKEND_FRONTNAME=admin
+      - UNATTENDED=true
+      - SEARCH_ENGINE=opensearch
+      - SEARCH_ENGINE_HOST=search
+      - SEARCH_ENGINE_PORT=9200
+    networks:
+      - backend
+  mysql:
+    image: library/mysql:8
+    restart: always
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_DATABASE=magento
+    networks:
+      - backend
+
+  search:
+    image: opensearchproject/opensearch
+    restart: always
+    ports:
+      - "9200:9200"
+      - "5601:5601"
+    volumes:
+      - ./opensearch:/var/lib/opensearch
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
